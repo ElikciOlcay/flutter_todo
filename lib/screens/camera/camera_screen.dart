@@ -1,6 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:todoey/screens/camera/camera_widgets/camera_control_widget.dart';
+import 'package:todoey/screens/camera/camera_widgets/camera_preview_widget.dart';
 import 'package:todoey/services/location.dart';
 import 'package:todoey/services/database.dart';
 
@@ -105,13 +107,17 @@ class _CameraScreenState extends State<CameraScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _cameraPreviewWidget(),
+        CameraPreviewWidget(
+          controller: _controller,
+        ),
         SizedBox(
           height: 20.0,
         ),
         Row(
           children: [
-            cameraControlWidget(context),
+            CameraControlWidget(
+              onCaptureCallback: onCapture,
+            ),
             _cameraTogglesRowWidget(),
           ],
         ),
@@ -128,25 +134,6 @@ class _CameraScreenState extends State<CameraScreen> {
     return AspectRatio(
       aspectRatio: _controller.value.aspectRatio,
       child: CameraPreview(_controller),
-    );
-  }
-
-  Widget cameraControlWidget(context) {
-    return Expanded(
-      child: Align(
-        alignment: Alignment.center,
-        child: FloatingActionButton(
-          heroTag: 'btn1',
-          child: Icon(
-            Icons.camera,
-            color: Colors.black,
-          ),
-          backgroundColor: Colors.white,
-          onPressed: () {
-            onCapture(context);
-          },
-        ),
-      ),
     );
   }
 
