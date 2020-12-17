@@ -1,34 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:todoey/models/task.dart';
-import 'package:todoey/models/user.dart';
+import 'package:todoey/models/todo.dart';
 import 'package:todoey/services/auth.dart';
-import 'package:todoey/widgets/task_list.dart';
+import 'package:todoey/widgets/modalBottomSheet.dart';
+import 'package:todoey/widgets/todo_list.dart';
 import 'package:todoey/screens/todo/add_todo_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:todoey/services/database.dart';
+import 'package:todoey/shared/constant.dart';
 
 class TodoScreen extends StatelessWidget {
   final AuthService _auth = AuthService();
   final DatabaseService _db = DatabaseService();
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<UserModel>(context);
     final todos = Provider.of<List<Todo>>(context);
 
     void _showAddTodoPanel() {
-      showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        builder: (context) => SingleChildScrollView(
-          child: Container(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: AddTodoScreen(),
-          ),
-        ),
-      );
+      ModalBottomSheet(context: context, sheetWidget: AddTodoScreen())
+          .showSheet();
     }
 
     return Scaffold(

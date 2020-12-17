@@ -22,20 +22,17 @@ class MyApp extends StatelessWidget {
           return StreamProvider<UserModel>.value(
             value: AuthService().user,
             child: MaterialApp(
-              routes: {
-                '/addTask': (context) => AddTodoScreen(),
-              },
               theme: ThemeData(
                 fontFamily: 'Roboto',
                 inputDecorationTheme: InputDecorationTheme(
                   filled: true,
                   fillColor: Colors.white,
+                  hintStyle: TextStyle(color: Colors.grey),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black26, width: 2.0),
+                    borderSide: BorderSide(color: Colors.grey, width: 1.0),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Colors.blueAccent, width: 2.0),
+                    borderSide: BorderSide(color: Colors.grey, width: 1.0),
                   ),
                 ),
               ),

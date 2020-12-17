@@ -8,7 +8,6 @@ import 'package:todoey/services/database.dart';
 
 class CameraScreen extends StatefulWidget {
   final Function cameraCallback;
-
   CameraScreen({this.cameraCallback});
 
   @override

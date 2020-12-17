@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:todoey/models/user.dart';
 import 'package:todoey/widgets/loading.dart';
 import 'package:todoey/services/auth.dart';
+import 'package:todoey/widgets/socialmedia_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   final Function toggleScreen;
@@ -19,6 +21,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  void signUpUser() async {
+    if (_formKey.currentState.validate()) {
+      setState(() {
+        loading = true;
+      });
+      UserModel user = await _auth.signUpWithEmailAndPassword(
+          emailController.text, passwordController.text);
+
+      if (user == null) {
+        setState(() {
+          errorMessage = _auth.getErrorMessage;
+          loading = false;
+        });
+      }
+    }
+  }
+
+  void signInWithGoogle() async {
+    setState(() {
+      loading = true;
+    });
+    UserModel user = await _auth.signInWithGoogle();
+    if (user == null) {
+      setState(() {
+        errorMessage = _auth.getErrorMessage;
+        loading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return loading
@@ -35,7 +67,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               elevation: 0.0,
               title: Text(
-                'Sign up to Todo',
+                'Sign up to Todoey',
                 style: TextStyle(color: Colors.blueGrey),
               ),
             ),
@@ -44,8 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
+                    padding: EdgeInsets.symmetric(horizontal: 30.0),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -79,33 +110,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           SizedBox(
                             height: 20.0,
                           ),
-                          RaisedButton(
-                            color: Colors.pink,
-                            child: Text(
-                              'Sign up',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            onPressed: () async {
-                              if (_formKey.currentState.validate()) {
-                                setState(() {
-                                  loading = true;
-                                });
-                                UserModel user =
-                                    await _auth.signUpWithEmailAndPassword(
-                                        emailController.text,
-                                        passwordController.text);
-
-                                if (user == null) {
-                                  setState(() {
-                                    errorMessage = _auth.getErrorMessage;
-                                    loading = false;
-                                  });
-                                }
-                              }
-                            },
+                          ButtonTheme(
+                            minWidth: MediaQuery.of(context).size.width,
+                            height: 50.0,
+                            child: RaisedButton(
+                                color: Colors.lightBlueAccent,
+                                elevation: 0.0,
+                                child: Text(
+                                  'Sign up',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18.0),
+                                ),
+                                onPressed: () {
+                                  if (_formKey.currentState.validate()) {
+                                    signUpUser();
+                                  }
+                                }),
                           ),
                           SizedBox(
                             height: 20.0,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SocialMediaButton(
+                                icon: FaIcon(
+                                  FontAwesomeIcons.facebook,
+                                  size: 25.0,
+                                  color: Colors.blueAccent,
+                                ),
+                              ),
+                              SocialMediaButton(
+                                icon: FaIcon(FontAwesomeIcons.google,
+                                    size: 25.0, color: Colors.redAccent),
+                                onPressedCallback: signInWithGoogle,
+                              ),
+                            ],
                           ),
                           Text(
                             errorMessage,

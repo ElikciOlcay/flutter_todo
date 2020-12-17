@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:todoey/models/user.dart';
 import 'database.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  static String errorMessage;
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+  String errorMessage;
 
   UserModel _userFromFirebase(User firebaseUser) {
     return firebaseUser != null
@@ -59,6 +61,39 @@ class AuthService {
       errorMessage = e.message;
       return null;
     }
+  }
+
+  Future signInWithGoogle() async {
+    final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
+
+    if (googleSignInAccount != null) {
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+
+      final UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+      final User firebaseUser = userCredential.user;
+
+      if (user != null) {
+        assert(!firebaseUser.isAnonymous);
+        assert(await firebaseUser.getIdToken() != null);
+
+        final User currentUser = _auth.currentUser;
+        assert(firebaseUser.uid == currentUser.uid);
+
+        await DatabaseService(uid: currentUser.uid)
+            .createUserWithTodo(currentUser.email);
+
+        return _userFromFirebase(currentUser);
+      }
+    }
+    errorMessage = '';
+    return null;
   }
 
   Future signOut() async {

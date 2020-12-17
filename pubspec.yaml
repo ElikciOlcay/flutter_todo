@@ -25,6 +25,9 @@ dependencies:
   google_maps_flutter: ^1.0.3
   geocoder: ^0.2.1
   firebase_storage: ^5.2.0
+  animated_text_kit: ^3.0.2
+  font_awesome_flutter:  ^8.11.0
+  google_sign_in: ^4.5.3
 
 
 dev_dependencies:

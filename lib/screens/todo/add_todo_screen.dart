@@ -1,47 +1,95 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:todoey/models/todo.dart';
 import 'package:todoey/models/user.dart';
 import 'package:todoey/services/database.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'dart:io';
+import 'package:todoey/widgets/image_container.dart';
 import 'package:todoey/screens/camera/camera_screen.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:todoey/widgets/chip.dart';
+import 'package:todoey/shared/date_formatter.dart';
 
 class AddTodoScreen extends StatefulWidget {
+  final Todo todo;
+
+  AddTodoScreen([this.todo]);
+
   @override
-  _AddTodoScreenState createState() => _AddTodoScreenState();
+  _AddTodoScreenState createState() => todo == null
+      ? _AddTodoScreenState()
+      : _AddTodoScreenState.todo(
+          title: todo.title,
+          dateString: DateFormatter(date: todo.toDate).formattedDate,
+          date: todo.toDate,
+          firebaseImagePath: todo.imgUrl,
+          location: todo.location,
+          todoId: todo.uid);
 }
 
 class _AddTodoScreenState extends State<AddTodoScreen> {
+  _AddTodoScreenState();
+
+  _AddTodoScreenState.todo(
+      {String title,
+      String dateString,
+      DateTime date,
+      String firebaseImagePath,
+      String location,
+      String todoId}) {
+    this.newTaskTitle = title;
+    this.editTodo = true;
+    this.firebaseImagePath = firebaseImagePath;
+    this.selectedDateString = dateString;
+    this.selectedDate = date;
+    this.userLocation = location;
+    this.todoId = todoId;
+  }
+
   String newTaskTitle;
   DateTime selectedDate;
   String selectedDateString = '';
   String hours;
   String imgPath;
+  String firebaseImagePath;
   String userLocation;
+  String todoId;
+  bool editTodo = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   void _cameraCallBack({String path, String location}) {
     setState(() {
       imgPath = path;
       userLocation = location;
+      firebaseImagePath = null;
     });
-  }
-
-  String _dateFormatter(DateTime date) {
-    String year = date.year.toString();
-    String month = date.month.toString();
-    String day = date.day.toString();
-    String hours = date.hour.toString();
-    String minutes = date.minute.toString();
-    String formattedDate = '$year-$month-$day / $hours:$minutes';
-    return formattedDate;
   }
 
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserModel>(context);
     DatabaseService _db = DatabaseService(uid: user.userId);
+
+    void createTodo() async {
+      await _db
+          .createTodo(title: newTaskTitle, toDate: selectedDate)
+          .then((todoId) => {
+                _db.uploadImage(filePath: imgPath, fileName: todoId).then(
+                    (imgUrl) async =>
+                        await _db.addImageToTodo(todoId, imgUrl, userLocation))
+              });
+    }
+
+    void updateTodo() async {
+      await _db
+          .updateTodo(title: newTaskTitle, toDate: selectedDate, todoId: todoId)
+          .then((value) => _db.uploadImage(filePath: imgPath, fileName: todoId))
+          .then((imgUrl) async =>
+              await _db.addImageToTodo(todoId, imgUrl, userLocation));
+    }
+
     return Container(
       color: Color(0xff757575),
       child: Container(
@@ -57,6 +105,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextField(
+              controller: TextEditingController()..text = newTaskTitle,
               decoration: InputDecoration(
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
@@ -87,7 +136,8 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                       onConfirm: (date) {
                         setState(() {
                           selectedDate = date;
-                          selectedDateString = _dateFormatter(date);
+                          selectedDateString =
+                              DateFormatter(date: date).formattedDate;
                         });
                       },
                     );
@@ -155,68 +205,21 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                 ),
               ],
             ),
-            Container(
-              alignment: Alignment.topLeft,
-              margin: EdgeInsets.symmetric(vertical: 20.0),
-              child: imgPath != null
-                  ? Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image.file(
-                            File(imgPath),
-                            height: 100.0,
-                            width: 50.0,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 20.0,
-                        ),
-                        Container(
-                          width: 200.0,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ToolChip(
-                                icon: Icon(
-                                  Icons.date_range,
-                                  color: Colors.white,
-                                  size: 18.0,
-                                ),
-                                label: _dateFormatter(
-                                  DateTime.now(),
-                                ),
-                              ),
-                              ToolChip(
-                                icon: Icon(
-                                  Icons.location_pin,
-                                  color: Colors.white,
-                                  size: 18.0,
-                                ),
-                                label: userLocation,
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    )
-                  : SizedBox(),
+            ImageContainer(
+              imgPath: imgPath,
+              firebaseImagePath: firebaseImagePath,
+              userLocation: userLocation,
             ),
             MaterialButton(
               elevation: 0.0,
               height: 50.0,
               onPressed: () async {
                 if (newTaskTitle != null) {
-                  await _db.createTodo(newTaskTitle, selectedDate).then(
-                        (todoId) => {
-                          _db
-                              .uploadImage(filePath: imgPath, fileName: todoId)
-                              .then((imgUrl) async => await _db.addImageToTodo(
-                                  todoId, imgUrl, userLocation)),
-                        },
-                      );
+                  if (editTodo) {
+                    updateTodo();
+                  } else {
+                    createTodo();
+                  }
                   Navigator.pop(context);
                 }
               },

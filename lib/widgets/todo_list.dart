@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:todoey/models/task.dart';
-import 'task_tile.dart';
+import 'package:todoey/models/todo.dart';
+import 'package:todoey/screens/todo/add_todo_screen.dart';
+import 'package:todoey/widgets/modalBottomSheet.dart';
+import 'todo_tile.dart';
 import 'package:provider/provider.dart';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TodoList extends StatefulWidget {
   @override
@@ -17,6 +17,11 @@ class _TodoListState extends State<TodoList> {
   Widget build(BuildContext context) {
     final todos = Provider.of<List<Todo>>(context);
 
+    void showAddTodoPanel(Todo todo) {
+      ModalBottomSheet(context: context, sheetWidget: AddTodoScreen(todo))
+          .showSheet();
+    }
+
     return todos != null
         ? ListView.builder(
             key: _listKey,
@@ -26,6 +31,9 @@ class _TodoListState extends State<TodoList> {
                 title: todos[index].title,
                 isChecked: todos[index].isDone,
                 uid: todos[index].uid,
+                imgUrl: todos[index].imgUrl,
+                todoDate: todos[index].toDate,
+                showBottomSheetCallback: () => showAddTodoPanel(todos[index]),
               );
             },
           )
