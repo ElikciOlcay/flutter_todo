@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:todoey/models/user.dart';
@@ -110,12 +111,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           SizedBox(
                             height: 20.0,
                           ),
-                          ButtonTheme(
-                            minWidth: MediaQuery.of(context).size.width,
-                            height: 50.0,
-                            child: RaisedButton(
+                          SizedBox(
+                            width: double.infinity,
+                            child: CupertinoButton(
                                 color: Colors.lightBlueAccent,
-                                elevation: 0.0,
                                 child: Text(
                                   'Sign up',
                                   style: TextStyle(

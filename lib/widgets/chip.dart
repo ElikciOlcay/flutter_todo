@@ -10,6 +10,7 @@ class ToolChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Chip(
       avatar: icon,
+      elevation: 0.0,
       backgroundColor: Colors.blueGrey,
       label: Text(
         label,

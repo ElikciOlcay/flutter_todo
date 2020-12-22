@@ -12,9 +12,13 @@ class Wrapper extends StatelessWidget {
 
     return user == null
         ? Authenticate()
-        : StreamProvider.value(
-            value: DatabaseService(uid: user.userId).todos,
-            child: TodoScreen(),
-          );
+        : MultiProvider(child: TodoScreen(), providers: [
+            StreamProvider.value(
+              value: DatabaseService(uid: user.userId).todos,
+            ),
+            StreamProvider.value(
+              value: DatabaseService(uid: user.userId).categories,
+            )
+          ]);
   }
 }

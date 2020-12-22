@@ -1,10 +1,12 @@
+import 'package:todoey/models/location.dart';
+
 class Todo {
   final String title;
   final bool isDone;
   final String uid;
   final String imgUrl;
   final DateTime toDate;
-  final String location;
+  final Location location;
 
   Todo(
       {this.title,

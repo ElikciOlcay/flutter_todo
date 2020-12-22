@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:todoey/screens/camera/camera_widgets/camera_control_widget.dart';
 import 'package:todoey/screens/camera/camera_widgets/camera_preview_widget.dart';
-import 'package:todoey/services/location.dart';
-import 'package:todoey/services/database.dart';
+import 'package:todoey/services/locationService.dart';
 
 class CameraScreen extends StatefulWidget {
   final Function cameraCallback;
@@ -18,8 +17,6 @@ class _CameraScreenState extends State<CameraScreen> {
   CameraController _controller;
   List _cameras;
   int _selectedCameraIdx;
-  Location locationService = Location();
-  DatabaseService _db = DatabaseService();
 
   @override
   void initState() {
@@ -69,14 +66,11 @@ class _CameraScreenState extends State<CameraScreen> {
       final p = await getTemporaryDirectory();
       final name = DateTime.now();
       final path = "${p.path}/$name.png";
-      await locationService.setCurrentLocation().then((value) async =>
-          await _controller.takePicture(path).then((value) async {
-            widget.cameraCallback(
-              path: path,
-              location: locationService.location,
-            );
-            Navigator.pop(context);
-          }));
+
+      await _controller.takePicture(path).then((value) async {
+        widget.cameraCallback(path: path);
+        Navigator.pop(context);
+      });
     } catch (e) {
       print(e);
     }
@@ -121,18 +115,6 @@ class _CameraScreenState extends State<CameraScreen> {
           ],
         ),
       ],
-    );
-  }
-
-  Widget _cameraPreviewWidget() {
-    if (_controller == null || !_controller.value.isInitialized) {
-      return Container(
-        color: Colors.black,
-      );
-    }
-    return AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
-      child: CameraPreview(_controller),
     );
   }
 

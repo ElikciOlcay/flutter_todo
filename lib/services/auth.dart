@@ -43,7 +43,7 @@ class AuthService {
           .createUserWithEmailAndPassword(email: email, password: password);
       User firebaseUser = userCredential.user;
       await DatabaseService(uid: firebaseUser.uid)
-          .createUserWithTodo(firebaseUser.email);
+          .createFirestoreUser(firebaseUser.email);
       return _userFromFirebase(firebaseUser);
     } catch (e) {
       errorMessage = e.message;
@@ -87,7 +87,7 @@ class AuthService {
         assert(firebaseUser.uid == currentUser.uid);
 
         await DatabaseService(uid: currentUser.uid)
-            .createUserWithTodo(currentUser.email);
+            .createFirestoreUser(currentUser.email);
 
         return _userFromFirebase(currentUser);
       }

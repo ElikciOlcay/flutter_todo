@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:todoey/models/user.dart';
 import 'package:todoey/widgets/loading.dart';
@@ -114,12 +116,10 @@ class _SignInState extends State<SignIn> {
                             SizedBox(
                               height: 20.0,
                             ),
-                            ButtonTheme(
-                              minWidth: MediaQuery.of(context).size.width,
-                              height: 50.0,
-                              child: RaisedButton(
+                            SizedBox(
+                              width: double.infinity,
+                              child: CupertinoButton(
                                   color: Colors.lightBlueAccent,
-                                  elevation: 0.0,
                                   child: Text(
                                     'Login',
                                     style: TextStyle(
